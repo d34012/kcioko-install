@@ -6,6 +6,7 @@ set -Eeuo pipefail
 # =================================================
 ICON_NAME="caja-actions"
 
+# NAME | SHARE | HOST | SUBPATH
 NETFOLDERS=(
     "Сетевая папка (Кциоко)|kcioko|172.32.120.50|"
     "Сетевая папка (Минобр)|minobr|10.164.216.9|/public"
@@ -76,10 +77,12 @@ done
 # =================================================
 create_shortcut() {
     local entry="$1"
-    IFS="|" read -r NAME SHARE HOST PATH <<<"$entry"
+    local NAME SHARE HOST SUBPATH
+
+    IFS="|" read -r NAME SHARE HOST SUBPATH <<<"$entry"
 
     local FILE_PATH="${DESKTOP_DIR}/${NAME}.desktop"
-    local URL="smb://${SHARE};${USERNAME}@${HOST}${PATH}"
+    local URL="smb://${SHARE};${USERNAME}@${HOST}${SUBPATH}"
 
     log "Создание ярлыка: $NAME"
 
