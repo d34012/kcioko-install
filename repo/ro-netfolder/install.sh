@@ -6,8 +6,6 @@ set -Eeuo pipefail
 # =================================================
 ICON_NAME="caja-actions"
 
-# Описание сетевых папок
-# format: NAME|SHARE|HOST|PATH
 NETFOLDERS=(
     "Сетевая папка (Кциоко)|kcioko|172.32.120.50|"
     "Сетевая папка (Минобр)|minobr|10.164.216.9|/public"
@@ -17,7 +15,7 @@ NETFOLDERS=(
 log()   { echo "[+] $1"; }
 error() { echo "[x] $1"; exit 1; }
 
-# Проверка root
+# root
 if [ "$EUID" -ne 0 ]; then
     exec sudo bash "$0" "$@"
 fi
@@ -38,14 +36,20 @@ select USERNAME in "${USERS[@]}"; do
 done
 
 USER_HOME="$(getent passwd "$USERNAME" | cut -d: -f6)"
+[ -d "$USER_HOME" ] || error "Домашний каталог не найден"
 
-# Определение Desktop
+# =================================================
+#          ОПРЕДЕЛЕНИЕ DESKTOP
+# =================================================
 if [ -d "$USER_HOME/Desktop" ]; then
     DESKTOP_DIR="$USER_HOME/Desktop"
 elif [ -d "$USER_HOME/Рабочий стол" ]; then
     DESKTOP_DIR="$USER_HOME/Рабочий стол"
 else
-    error "Не найден рабочий стол пользователя $USERNAME"
+    DESKTOP_DIR="$USER_HOME/Desktop"
+    log "Рабочий стол не найден — создаю $DESKTOP_DIR"
+    mkdir -p "$DESKTOP_DIR"
+    chown "$USERNAME:$USERNAME" "$DESKTOP_DIR"
 fi
 
 # =================================================
@@ -68,30 +72,26 @@ select ITEM in "${NETFOLDERS[@]}"; do
 done
 
 # =================================================
-#         ФУНКЦИЯ СОЗДАНИЯ ЯРЛЫКА
+#         СОЗДАНИЕ ЯРЛЫКА
 # =================================================
 create_shortcut() {
     local entry="$1"
-
     IFS="|" read -r NAME SHARE HOST PATH <<<"$entry"
 
-    local FILE_NAME="${NAME}.desktop"
-    local FILE_PATH="${DESKTOP_DIR}/${FILE_NAME}"
-
+    local FILE_PATH="${DESKTOP_DIR}/${NAME}.desktop"
     local URL="smb://${SHARE};${USERNAME}@${HOST}${PATH}"
 
     log "Создание ярлыка: $NAME"
 
-    cat > "$FILE_PATH" <<EOF
-[Desktop Entry]
+    printf "%s\n" \
+"[Desktop Entry]
 Name=${NAME}
 Type=Application
 Exec=caja ${URL}
 Icon=${ICON_NAME}
 Terminal=false
 Categories=Network;FileManager;
-StartupNotify=true
-EOF
+StartupNotify=true" > "$FILE_PATH"
 
     chmod 755 "$FILE_PATH"
     chown "$USERNAME:$USERNAME" "$FILE_PATH"
