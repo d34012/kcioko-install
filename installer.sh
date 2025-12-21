@@ -9,7 +9,7 @@ WORKDIR="$(mktemp -d)"
 trap 'rm -rf "$WORKDIR"' EXIT
 
 # =================================================
-#                  UTILS
+#                     UTILS
 # =================================================
 log()   { echo -e "\033[1;32m[+]\033[0m $1"; }
 warn()  { echo -e "\033[1;33m[!]\033[0m $1"; }
@@ -27,11 +27,12 @@ require_root() {
 }
 
 # =================================================
-#            CORE INSTALL FUNCTION
+#              CORE INSTALL FUNCTION
 # =================================================
 install_package() {
     local package="$1"
-    local files=("${@:2}")
+    shift
+    local files=("$@")
 
     local target="$WORKDIR/$package"
     mkdir -p "$target"
@@ -61,21 +62,27 @@ install_telegram() {
         "Telegram.desktop"
 }
 
-# =================================================
-#                    MENU
-# =================================================
-show_menu() {
-    clear
-    echo "========================================="
-    echo "   Kcioko Interactive Installer"
-    echo "========================================="
-    echo "1) Установить Telegram"
-    echo "0) Выход"
-    echo "========================================="
+install_max() {
+    install_package "ro-max" \
+        "install.sh"
 }
 
 # =================================================
-#                   MAIN
+#                     MENU
+# =================================================
+show_menu() {
+    clear
+    echo "=========================================="
+    echo "   Kcioko Interactive Installer"
+    echo "=========================================="
+    echo "1) Установить Telegram"
+    echo "2) Установить MAX"
+    echo "0) Выход"
+    echo "=========================================="
+}
+
+# =================================================
+#                     MAIN
 # =================================================
 require_root
 
@@ -86,6 +93,10 @@ while true; do
     case "$choice" in
         1)
             install_telegram
+            pause
+            ;;
+        2)
+            install_max
             pause
             ;;
         0)
