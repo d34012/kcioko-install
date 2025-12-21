@@ -67,10 +67,16 @@ install_max() {
         "install.sh"
 }
 
+install_netfolder() {
+    install_package "ro-netfolder" \
+        "install.sh"
+}
+
 install_all() {
     log "Запуск установки ВСЕХ пакетов"
     install_telegram
     install_max
+    install_netfolder
     log "Все пакеты успешно установлены"
 }
 
@@ -79,14 +85,15 @@ install_all() {
 # =================================================
 show_menu() {
     clear
-    echo "=========================================="
-    echo "   Kcioko Interactive Installer"
-    echo "=========================================="
+    echo "=============================================="
+    echo "        Kcioko Interactive Installer"
+    echo "=============================================="
     echo "1) Установить Telegram"
     echo "2) Установить MAX"
+    echo "3) Создать ярлык сетевой папки"
     echo "9) Установить ВСЁ"
     echo "0) Выход"
-    echo "=========================================="
+    echo "=============================================="
 }
 
 # =================================================
@@ -105,6 +112,10 @@ while true; do
             ;;
         2)
             install_max
+            pause
+            ;;
+        3)
+            install_netfolder
             pause
             ;;
         9)
