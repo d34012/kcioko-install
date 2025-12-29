@@ -5,7 +5,7 @@ set -Eeuo pipefail
 REPO_FILE="/etc/yum.repos.d/max.repo"
 REPO_NAME="MAX Desktop"
 GPG_KEY_URL="https://download.max.ru/linux/rpm/public.asc"
-BASEURL="https://download.max.ru/linux/rpm/el/9/\$basearch"
+BASEURL="http://172.32.140.20/images/REDOS7MAX/"
 # ============================================
 
 log() {
@@ -32,10 +32,10 @@ tee "$REPO_FILE" >/dev/null <<EOF
 name=$REPO_NAME
 baseurl=$BASEURL
 enabled=1
-gpgcheck=1
-repo_gpgcheck=1
+gpgcheck=0
+repo_gpgcheck=0
 gpgkey=$GPG_KEY_URL
-sslverify=1
+sslverify=0
 metadata_expire=300
 EOF
 
