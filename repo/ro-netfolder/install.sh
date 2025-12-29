@@ -47,7 +47,7 @@ if [ -d "$USER_HOME/Desktop" ]; then
 elif [ -d "$USER_HOME/Рабочий стол" ]; then
     DESKTOP_DIR="$USER_HOME/Рабочий стол"
 else
-    DESKTOP_DIR="$USER_HOME/Desktop"
+    DESKTOP_DIR="$USER_HOME/Рабочий стол"
     log "Рабочий стол не найден — создаю $DESKTOP_DIR"
     mkdir -p "$DESKTOP_DIR"
     chown "$USERNAME:$USERNAME" "$DESKTOP_DIR"
