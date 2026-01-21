@@ -72,11 +72,17 @@ install_netfolder() {
         "install.sh"
 }
 
+install_assistant() {
+    install_package "ro-assistant" \
+        "install.sh"
+}
+
 install_all() {
     log "Запуск установки ВСЕХ пакетов"
     install_telegram
     install_max
     install_netfolder
+    install_assistant
     log "Все пакеты успешно установлены"
 }
 
@@ -91,6 +97,7 @@ show_menu() {
     echo "1) Установить Telegram"
     echo "2) Установить MAX"
     echo "3) Создать ярлык сетевой папки"
+    echo "4) Установить Ассистент"
     echo "9) Установить ВСЁ"
     echo "0) Выход"
     echo "=============================================="
@@ -116,6 +123,10 @@ while true; do
             ;;
         3)
             install_netfolder
+            pause
+            ;;
+        4)
+            install_assistant
             pause
             ;;
         9)
