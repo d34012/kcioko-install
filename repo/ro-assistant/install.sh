@@ -4,7 +4,7 @@ set -Eeuo pipefail
 # ================= НАСТРОЙКИ =================
 ASSISTANT_URL="https://мойассистент.рф/скачать/Download/1376"
 TMP_DIR="/tmp/ro-assistant"
-PACKAGE_PREFIX="assistant-fstek"
+PACKAGE_PREFIX="assistant"
 # ============================================
 
 log()   { echo "[+] $1"; }
