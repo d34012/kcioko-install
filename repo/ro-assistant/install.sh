@@ -22,10 +22,15 @@ mkdir -p "$TMP_DIR"
 cd "$TMP_DIR"
 
 log "Проверка установленного ассистента"
-INSTALLED_PACKAGES=($(dnf list installed 2>/dev/null | awk '{print $1}' | grep "^${PACKAGE_PREFIX}-"))
-if [[ ${#INSTALLED_PACKAGES[@]} -gt 0 ]]; then
-    log "Найдено установленных пакетов $PACKAGE_PREFIX: ${INSTALLED_PACKAGES[*]}"
-    dnf remove -y --allowerasing "${INSTALLED_PACKAGES[@]}" \
+
+INSTALLED_PACKAGES=$(rpm -qa | grep "^${PACKAGE_PREFIX}-" || true)
+
+if [[ -n "$INSTALLED_PACKAGES" ]]; then
+    log "Найдены установленные пакеты:"
+    echo "$INSTALLED_PACKAGES"
+
+    log "Удаление старого ассистента"
+    rpm -e --nodeps $INSTALLED_PACKAGES \
         || error "Не удалось удалить старый ассистент"
 else
     log "Установленный ассистент не найден"
