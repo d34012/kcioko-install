@@ -5,7 +5,9 @@ log()   { echo "[+] $1"; }
 warn()  { echo "[!] $1"; }
 error() { echo "[x] $1"; exit 1; }
 
-# root
+# =================================================
+# ROOT CHECK
+# =================================================
 if [ "$EUID" -ne 0 ]; then
     exec sudo bash "$0" "$@"
 fi
@@ -35,21 +37,20 @@ select USERNAME in "${USERS[@]}"; do
     echo "Неверный выбор"
 done
 
+USER_HOME="$(getent passwd "$USERNAME" | cut -d: -f6)"
+[ -d "$USER_HOME" ] || error "Домашний каталог пользователя не найден"
+
 # =================================================
-# 3. СОЗДАНИЕ ДИРЕКТОРИЙ
+# 3. СОЗДАНИЕ ДИРЕКТОРИЙ И НАСТРОЕК
 # =================================================
 if [[ "$ORG" == "КЦИОКО" ]]; then
-    BASE_DIR="/mnt/kcioko"
     mkdir -p /mnt/kcioko/{inform,obmen,otdel}
     CRED_FILE="/root/.smbuser"
-    SERVER="172.32.120.50"
     DOMAIN="kcioko"
     DEFAULT_PASS="123qwe!@#"
 else
-    BASE_DIR="/mnt/minobr"
     mkdir -p /mnt/minobr
     CRED_FILE="/root/.smbuser_minobr"
-    SERVER="10.164.216.9"
     DOMAIN="minobr"
     DEFAULT_PASS="111111Qq"
 fi
@@ -57,7 +58,7 @@ fi
 log "Каталоги созданы"
 
 # =================================================
-# 4-5. СОЗДАНИЕ ФАЙЛА УЧЕТНЫХ ДАННЫХ
+# 4. СОЗДАНИЕ ФАЙЛА УЧЕТНЫХ ДАННЫХ
 # =================================================
 echo
 read -rp "Использовать пароль по умолчанию? (y/n): " USE_DEFAULT
@@ -79,7 +80,7 @@ chmod 400 "$CRED_FILE"
 log "Файл учетных данных создан: $CRED_FILE"
 
 # =================================================
-# 6. ДОБАВЛЕНИЕ В FSTAB (без дублей)
+# 5. ДОБАВЛЕНИЕ В /etc/fstab
 # =================================================
 add_fstab_entry() {
     local ENTRY="$1"
@@ -97,7 +98,7 @@ fi
 log "Записи в /etc/fstab добавлены"
 
 # =================================================
-# 7. СОЗДАНИЕ SYSTEMD SERVICE
+# 6. SYSTEMD SERVICE
 # =================================================
 SERVICE_FILE="/etc/systemd/system/mount-a.service"
 
@@ -123,7 +124,7 @@ systemctl enable mount-a.service
 log "Service создан и включен"
 
 # =================================================
-# 8. ПРОВЕРКА MOUNT
+# 7. ПРОВЕРКА MOUNT
 # =================================================
 while true; do
     if systemctl start mount-a.service; then
@@ -145,4 +146,31 @@ while true; do
     fi
 done
 
+# =================================================
+# 8. СОЗДАНИЕ СИМВОЛИЧЕСКИХ ССЫЛОК
+# =================================================
+create_link() {
+    local TARGET="$1"
+    local NAME="$2"
+    local LINK_PATH="$USER_HOME/$NAME"
+
+    if [ -L "$LINK_PATH" ] || [ -e "$LINK_PATH" ]; then
+        rm -rf "$LINK_PATH"
+    fi
+
+    ln -s "$TARGET" "$LINK_PATH"
+    chown -h "$USERNAME:$USERNAME" "$LINK_PATH"
+
+    log "Создана ссылка: $NAME"
+}
+
+if [[ "$ORG" == "КЦИОКО" ]]; then
+    create_link "/mnt/kcioko/inform" "КЦИОКО_Информ"
+    create_link "/mnt/kcioko/obmen"  "КЦИОКО_Обмен"
+    create_link "/mnt/kcioko/otdel"  "КЦИОКО_Отдел"
+else
+    create_link "/mnt/minobr" "МИНОБР_Public"
+fi
+
+log "Ссылки созданы в домашнем каталоге пользователя"
 log "Готово."
