@@ -41,7 +41,20 @@ USER_HOME="$(getent passwd "$USERNAME" | cut -d: -f6)"
 [ -d "$USER_HOME" ] || error "Домашний каталог пользователя не найден"
 
 # =================================================
-# 3. СОЗДАНИЕ ДИРЕКТОРИЙ И НАСТРОЕК
+# ОПРЕДЕЛЕНИЕ РАБОЧЕГО СТОЛА
+# =================================================
+if [ -d "$USER_HOME/Desktop" ]; then
+    DESKTOP_DIR="$USER_HOME/Desktop"
+elif [ -d "$USER_HOME/Рабочий стол" ]; then
+    DESKTOP_DIR="$USER_HOME/Рабочий стол"
+else
+    DESKTOP_DIR="$USER_HOME/Desktop"
+    mkdir -p "$DESKTOP_DIR"
+    chown "$USERNAME:$USERNAME" "$DESKTOP_DIR"
+fi
+
+# =================================================
+# 3. СОЗДАНИЕ ДИРЕКТОРИЙ
 # =================================================
 if [[ "$ORG" == "КЦИОКО" ]]; then
     mkdir -p /mnt/kcioko/{inform,obmen,otdel}
@@ -53,6 +66,13 @@ else
     CRED_FILE="/root/.smbuser_minobr"
     DOMAIN="minobr"
     DEFAULT_PASS="111111Qq"
+
+    # Исправление username для МИНОБР
+    if [[ "$USERNAME" =~ ^([0-9]+-user)-[0-9]+$ ]]; then
+        USERNAME_CRED="${BASH_REMATCH[1]}"
+    else
+        USERNAME_CRED="$USERNAME"
+    fi
 fi
 
 log "Каталоги созданы"
@@ -70,8 +90,13 @@ else
     echo
 fi
 
+# Для КЦИОКО username обычный
+if [[ "$ORG" == "КЦИОКО" ]]; then
+    USERNAME_CRED="$USERNAME"
+fi
+
 cat > "$CRED_FILE" <<EOF
-username=$USERNAME
+username=$USERNAME_CRED
 password=$PASSWORD
 domain=$DOMAIN
 EOF
@@ -100,9 +125,7 @@ log "Записи в /etc/fstab добавлены"
 # =================================================
 # 6. SYSTEMD SERVICE
 # =================================================
-SERVICE_FILE="/etc/systemd/system/mount-a.service"
-
-cat > "$SERVICE_FILE" <<EOF
+cat > /etc/systemd/system/mount-a.service <<EOF
 [Unit]
 Description=Run mount -a after network is up
 After=network-online.target
@@ -121,8 +144,6 @@ EOF
 systemctl daemon-reload
 systemctl enable mount-a.service
 
-log "Service создан и включен"
-
 # =================================================
 # 7. ПРОВЕРКА MOUNT
 # =================================================
@@ -131,7 +152,7 @@ while true; do
         log "Сетевые папки успешно подключены"
         break
     else
-        warn "Ошибка подключения. Возможно неверный пароль или нет доступа."
+        warn "Ошибка подключения. Возможно неверный пароль."
         echo "1) Попробовать снова"
         echo "2) Завершить"
         read -rp "Выбор: " RETRY
@@ -147,12 +168,12 @@ while true; do
 done
 
 # =================================================
-# 8. СОЗДАНИЕ СИМВОЛИЧЕСКИХ ССЫЛОК
+# 8. СОЗДАНИЕ ССЫЛОК НА РАБОЧЕМ СТОЛЕ
 # =================================================
 create_link() {
     local TARGET="$1"
     local NAME="$2"
-    local LINK_PATH="$USER_HOME/$NAME"
+    local LINK_PATH="$DESKTOP_DIR/$NAME"
 
     if [ -L "$LINK_PATH" ] || [ -e "$LINK_PATH" ]; then
         rm -rf "$LINK_PATH"
@@ -172,5 +193,5 @@ else
     create_link "/mnt/minobr" "МИНОБР_Public"
 fi
 
-log "Ссылки созданы в домашнем каталоге пользователя"
+log "Ссылки созданы на рабочем столе пользователя"
 log "Готово."
