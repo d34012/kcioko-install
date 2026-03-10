@@ -5,6 +5,8 @@ set -Eeuo pipefail
 #               GLOBAL SETTINGS
 # =================================================
 REPO_RAW_BASE="https://raw.githubusercontent.com/d34012/kcioko-install/main"
+GITHUB_TOKEN="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'"
+
 WORKDIR="$(mktemp -d)"
 trap 'rm -rf "$WORKDIR"' EXIT
 
@@ -26,10 +28,21 @@ require_root() {
     fi
 }
 
+download_file() {
+    local url="$1"
+    local output="$2"
+
+    curl -H "Authorization: Bearer $GITHUB_TOKEN" \
+         -H "Accept: application/vnd.github.v3.raw" \
+         -fL "$url" \
+         -o "$output"
+}
+
 # =================================================
 #              CORE INSTALL FUNCTION
 # =================================================
 install_package() {
+
     local package="$1"
     shift
     local files=("$@")
@@ -41,12 +54,17 @@ install_package() {
 
     for file in "${files[@]}"; do
         local url="$REPO_RAW_BASE/repo/$package/$file"
+
         log "Скачивание $file"
-        curl -fL "$url" -o "$target/$file" \
-            || error "Не удалось скачать $file"
+
+        if ! download_file "$url" "$target/$file"; then
+            error "Не удалось скачать $file"
+        fi
     done
 
     chmod +x "$target/install.sh"
+
+    log "Запуск install.sh"
     (cd "$target" && ./install.sh)
 
     log "Пакет $package установлен"
@@ -78,11 +96,14 @@ install_assistant() {
 }
 
 install_all() {
+
     log "Запуск установки ВСЕХ пакетов"
+
     install_telegram
     install_max
     install_netfolder
     install_assistant
+
     log "Все пакеты успешно установлены"
 }
 
@@ -90,7 +111,9 @@ install_all() {
 #                     MENU
 # =================================================
 show_menu() {
+
     clear
+
     echo "=============================================="
     echo "        Kcioko Interactive Installer"
     echo "=============================================="
@@ -109,37 +132,48 @@ show_menu() {
 require_root
 
 while true; do
+
     show_menu
+
     read -rp "Выберите пункт: " choice
 
     case "$choice" in
+
         1)
             install_telegram
             pause
             ;;
+
         2)
             install_max
             pause
             ;;
+
         3)
             install_netfolder
             pause
             ;;
+
         4)
             install_assistant
             pause
             ;;
+
         9)
             install_all
             pause
             ;;
+
         0)
             echo "Выход"
             exit 0
             ;;
+
         *)
             warn "Неверный пункт меню"
             pause
             ;;
+
     esac
+
 done
