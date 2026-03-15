@@ -98,7 +98,7 @@ SMBFILE="/root/.smbuser"
 
 cat > "$SMBFILE" <<EOF
 username=$SMB_USER
-password=123456
+password=123qwe!@#
 domain=kcioko
 EOF
 
