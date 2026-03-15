@@ -210,18 +210,18 @@ log "Создание ссылок на рабочем столе"
 
 if [[ "$TYPE" == "kcioko" ]]; then
 
-ln -sf /mnt/kcioko/inform "$DESKTOP/inform"
-ln -sf /mnt/kcioko/obmen "$DESKTOP/obmen"
-ln -sf /mnt/kcioko/otdel "$DESKTOP/otdel"
+ln -sf /mnt/kcioko/inform "$DESKTOP/ИНФОРМ"
+ln -sf /mnt/kcioko/obmen "$DESKTOP/ОБМЕН"
+ln -sf /mnt/kcioko/otdel "$DESKTOP/ОТДЕЛ"
 
-chown "$USERNAME:$USERNAME" "$DESKTOP"/inform
-chown "$USERNAME:$USERNAME" "$DESKTOP"/obmen
-chown "$USERNAME:$USERNAME" "$DESKTOP"/otdel
+chown "$USERNAME:$USERNAME" "$DESKTOP"/ИНФОРМ
+chown "$USERNAME:$USERNAME" "$DESKTOP"/ОБМЕН
+chown "$USERNAME:$USERNAME" "$DESKTOP"/ОТДЕЛ
 
 else
 
-ln -sf /mnt/minobr "$DESKTOP/minobr"
-chown "$USERNAME:$USERNAME" "$DESKTOP/minobr"
+ln -sf /mnt/minobr "$DESKTOP/СП_МИНОБР"
+chown "$USERNAME:$USERNAME" "$DESKTOP/СП_МИНОБР"
 
 fi
 
