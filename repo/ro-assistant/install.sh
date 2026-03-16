@@ -2,7 +2,7 @@
 set -Eeuo pipefail
 
 # ================= НАСТРОЙКИ =================
-ASSISTANT_URL="https://мойассистент.рф/скачать/Download/1376"
+ASSISTANT_URL="https://lk2.мойассистент.рф/WebApi/Platforms/Download/1376"
 TMP_DIR="/tmp/ro-assistant"
 PACKAGE_PREFIX="assistant"
 # ============================================
