@@ -47,7 +47,7 @@ log "Очистка кэша dnf"
 dnf clean all
 
 log "Установка пакета MAX"
-dnf install -y MAX \
+dnf install -y max \
     || error "Ошибка установки MAX"
 
 log "MAX успешно установлен"
