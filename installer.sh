@@ -77,6 +77,11 @@ install_assistant() {
         "install.sh"
 }
 
+install_vipnet_dns_fix() {
+    install_package "ro-vipnet-dns-fix" \
+        "install.sh"
+}
+
 install_all() {
     log "Запуск установки ВСЕХ пакетов"
     install_telegram
@@ -98,6 +103,7 @@ show_menu() {
     echo "2) Установить MAX"
     echo "3) Создать ярлык сетевой папки"
     echo "4) Установить Ассистент"
+    echo "5) Исправление DNS VIPNet"
     echo "9) Установить ВСЁ"
     echo "0) Выход"
     echo "=============================================="
@@ -127,6 +133,10 @@ while true; do
             ;;
         4)
             install_assistant
+            pause
+            ;;
+        5)
+            install_vipnet_dns_fix
             pause
             ;;
         9)
